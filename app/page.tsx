@@ -1,6 +1,9 @@
 import { AppShell } from "@/components/layout/AppShell";
 import { Card } from "@/components/ui/Card";
 import { KpiCard } from "@/components/ui/KpiCard";
+import { getVehicleRecords } from "@/lib/vehicle-service";
+
+const vehicleCount = getVehicleRecords().length;
 
 const kpis = [
   {
@@ -33,6 +36,12 @@ const kpis = [
   },
 ];
 
+const fleetSummary = [
+  { label: "Vehículos activos", value: `${vehicleCount}` },
+  { label: "Disponibles", value: `${vehicleCount - 1}` },
+  { label: "En mantenimiento", value: "1" },
+];
+
 const recentTrips = [
   { id: "TR-1048", route: "Bogotá → Medellín", driver: "Sofía Pérez", vehicle: "AX-204", status: "Completado", revenue: "$18.400" },
   { id: "TR-1047", route: "Cali → Bucaramanga", driver: "Mateo Ruiz", vehicle: "RT-118", status: "En curso", revenue: "$12.950" },
@@ -52,6 +61,17 @@ export default function Home() {
             <KpiCard key={item.label} {...item} />
           ))}
         </div>
+
+        <Card title="Resumen de flota" subtitle="Información operativa tomada desde los datos mock de vehículos">
+          <div className="grid gap-3 sm:grid-cols-3">
+            {fleetSummary.map((item) => (
+              <div key={item.label} className="rounded-xl border border-slate-800 bg-slate-950/70 p-3">
+                <p className="text-sm text-slate-400">{item.label}</p>
+                <p className="mt-2 text-2xl font-semibold text-white">{item.value}</p>
+              </div>
+            ))}
+          </div>
+        </Card>
 
         <div className="grid gap-6 xl:grid-cols-[1.45fr_0.95fr]">
           <Card title="Gráfico de ingresos" subtitle="Evolución mensual del rendimiento operativo">
