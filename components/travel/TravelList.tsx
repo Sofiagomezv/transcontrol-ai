@@ -36,7 +36,7 @@ export function TravelList({ travels, onCreate, onEdit, onDelete, onView }: Trav
               <th className="px-3 py-3 font-medium">Fecha</th>
               <th className="px-3 py-3 font-medium">Cliente</th>
               <th className="px-3 py-3 font-medium">Ruta</th>
-              <th className="px-3 py-3 font-medium">Valor</th>
+              <th className="px-3 py-3 font-medium">Flete</th>
               <th className="px-3 py-3 font-medium">Utilidad</th>
               <th className="px-3 py-3 font-medium">Acciones</th>
             </tr>
@@ -48,7 +48,7 @@ export function TravelList({ travels, onCreate, onEdit, onDelete, onView }: Trav
                 <td className="px-3 py-3">{travel.date}</td>
                 <td className="px-3 py-3">{travel.client}</td>
                 <td className="px-3 py-3">{travel.origin} → {travel.destination}</td>
-                <td className="px-3 py-3">{formatTravelCurrency(travel.tripValue)}</td>
+                <td className="px-3 py-3">{formatTravelCurrency(travel.freightValue)}</td>
                 <td className="px-3 py-3 text-emerald-400">{formatTravelCurrency(travel.utility)}</td>
                 <td className="px-3 py-3">
                   <div className="flex flex-wrap gap-2">

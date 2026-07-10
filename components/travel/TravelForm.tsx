@@ -20,7 +20,7 @@ const emptyValues: TravelFormValues = {
   origin: "",
   destination: "",
   kilometers: 0,
-  tripValue: 0,
+  freightValue: 0,
   fuel: 0,
   urea: 0,
   tolls: 0,
@@ -28,6 +28,7 @@ const emptyValues: TravelFormValues = {
   driverPayment: 0,
   otherExpenses: 0,
   observations: "",
+  status: "borrador",
 };
 
 export function TravelForm({ initialValues, onSubmit, onCancel, submitLabel = "Guardar viaje" }: TravelFormProps) {
@@ -123,13 +124,13 @@ export function TravelForm({ initialValues, onSubmit, onCancel, submitLabel = "G
           />
         </label>
         <label className="space-y-2 text-sm text-slate-300">
-          <span>Valor del viaje</span>
+          <span>Valor del flete</span>
           <input
             type="number"
             min="0"
             required
-            value={values.tripValue}
-            onChange={(event) => handleChange("tripValue", Number(event.target.value))}
+            value={values.freightValue}
+            onChange={(event) => handleChange("freightValue", Number(event.target.value))}
             className="w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2.5 text-white outline-none ring-0"
           />
         </label>

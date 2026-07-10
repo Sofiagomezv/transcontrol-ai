@@ -58,8 +58,8 @@ export function TravelDetail({ travel, onBack }: TravelDetailProps) {
       <Card title="Finanzas" subtitle="Indicadores de rendimiento del viaje">
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <div className="rounded-xl border border-slate-800 bg-slate-950/70 p-3">
-            <p className="text-sm text-slate-400">Valor del viaje</p>
-            <p className="mt-1 font-semibold text-white">{formatTravelCurrency(travel.tripValue)}</p>
+            <p className="text-sm text-slate-400">Valor del flete</p>
+            <p className="mt-1 font-semibold text-white">{formatTravelCurrency(travel.freightValue)}</p>
           </div>
           <div className="rounded-xl border border-slate-800 bg-slate-950/70 p-3">
             <p className="text-sm text-slate-400">Total de gastos</p>

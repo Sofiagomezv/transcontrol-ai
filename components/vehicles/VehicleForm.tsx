@@ -18,6 +18,7 @@ const emptyValues: VehicleFormValues = {
   year: new Date().getFullYear(),
   type: "Camión",
   capacity: "",
+  currentMileage: 0,
   status: "Disponible",
 };
 

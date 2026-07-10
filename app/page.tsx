@@ -1,153 +1,127 @@
+"use client";
+
+import { useMemo } from "react";
 import { AppShell } from "@/components/layout/AppShell";
 import { Card } from "@/components/ui/Card";
 import { KpiCard } from "@/components/ui/KpiCard";
+import { getOperationRecords } from "@/lib/operation-service";
 import { getVehicleRecords } from "@/lib/vehicle-service";
 
-const vehicleCount = getVehicleRecords().length;
+function formatCurrency(value: number) {
+  return new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 }).format(value);
+}
 
-const kpis = [
-  {
-    label: "Ingresos",
-    value: "$248.4K",
-    change: "+12.8%",
-    tone: "positive" as const,
-    icon: <span className="text-lg font-semibold">↗</span>,
-  },
-  {
-    label: "Gastos",
-    value: "$164.2K",
-    change: "-3.1%",
-    tone: "neutral" as const,
-    icon: <span className="text-lg font-semibold">↘</span>,
-  },
-  {
-    label: "Utilidad",
-    value: "$84.2K",
-    change: "+8.4%",
-    tone: "positive" as const,
-    icon: <span className="text-lg font-semibold">◎</span>,
-  },
-  {
-    label: "Rentabilidad",
-    value: "34.0%",
-    change: "+1.2 pts",
-    tone: "positive" as const,
-    icon: <span className="text-lg font-semibold">%</span>,
-  },
-];
-
-const fleetSummary = [
-  { label: "Vehículos activos", value: `${vehicleCount}` },
-  { label: "Disponibles", value: `${vehicleCount - 1}` },
-  { label: "En mantenimiento", value: "1" },
-];
-
-const recentTrips = [
-  { id: "TR-1048", route: "Bogotá → Medellín", driver: "Sofía Pérez", vehicle: "AX-204", status: "Completado", revenue: "$18.400" },
-  { id: "TR-1047", route: "Cali → Bucaramanga", driver: "Mateo Ruiz", vehicle: "RT-118", status: "En curso", revenue: "$12.950" },
-  { id: "TR-1046", route: "Barranquilla → Cartagena", driver: "Laura Gómez", vehicle: "QW-77", status: "Pendiente", revenue: "$9.800" },
-  { id: "TR-1045", route: "Medellín → Pereira", driver: "Daniel Torres", vehicle: "LM-33", status: "Completado", revenue: "$7.600" },
-];
+function getStatusTone(status: string) {
+  switch (status) {
+    case "cerrada":
+      return "bg-emerald-500/15 text-emerald-400";
+    case "en ruta":
+      return "bg-sky-500/15 text-sky-400";
+    case "programada":
+      return "bg-amber-500/15 text-amber-400";
+    default:
+      return "bg-slate-500/15 text-slate-300";
+  }
+}
 
 export default function Home() {
+  const operations = useMemo(() => getOperationRecords(), []);
+  const vehicles = useMemo(() => getVehicleRecords(), []);
+
+  const totalIncome = operations.reduce((sum, operation) => sum + operation.freightValue, 0);
+  const totalExpenses = operations.reduce((sum, operation) => sum + operation.totalExpenses, 0);
+  const utility = totalIncome - totalExpenses;
+  const profitability = totalIncome === 0 ? 0 : (utility / totalIncome) * 100;
+  const operationsInRoute = operations.filter((operation) => operation.status === "en ruta").length;
+  const pendingClosure = operations.filter((operation) => operation.status !== "cerrada").length;
+  const availableVehicles = vehicles.filter((vehicle) => vehicle.status === "Disponible").length;
+  const latestOperations = [...operations].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 5);
+
+  const categoryExpenses = [
+    { label: "Combustible", value: operations.reduce((sum, operation) => sum + operation.fuel, 0), color: "bg-[#2563EB]" },
+    { label: "Urea", value: operations.reduce((sum, operation) => sum + operation.urea, 0), color: "bg-[#16A34A]" },
+    { label: "Peajes", value: operations.reduce((sum, operation) => sum + operation.tolls, 0), color: "bg-[#DC2626]" },
+    { label: "Viáticos", value: operations.reduce((sum, operation) => sum + operation.perDiem, 0), color: "bg-slate-500" },
+    { label: "Pago conductor", value: operations.reduce((sum, operation) => sum + operation.driverPayment, 0), color: "bg-amber-500" },
+    { label: "Otros", value: operations.reduce((sum, operation) => sum + operation.otherExpenses, 0), color: "bg-violet-500" },
+  ];
+
+  const maxValue = Math.max(...categoryExpenses.map((item) => item.value), 1);
+
   return (
-    <AppShell
-      title="Dashboard ejecutivo"
-      description="Control total de ingresos, costos y operación en tiempo real."
-    >
+    <AppShell title="Dashboard ejecutivo" description="Control total de ingresos, costos y operación en tiempo real.">
       <div className="space-y-6">
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          {kpis.map((item) => (
-            <KpiCard key={item.label} {...item} />
-          ))}
+          <KpiCard label="Ingresos" value={formatCurrency(totalIncome)} change="Actual" tone="positive" icon={<span className="text-lg font-semibold">↗</span>} />
+          <KpiCard label="Gastos" value={formatCurrency(totalExpenses)} change="Actual" tone="neutral" icon={<span className="text-lg font-semibold">↘</span>} />
+          <KpiCard label="Utilidad" value={formatCurrency(utility)} change="Actual" tone="positive" icon={<span className="text-lg font-semibold">◎</span>} />
+          <KpiCard label="Rentabilidad" value={`${profitability.toFixed(1)}%`} change="General" tone="positive" icon={<span className="text-lg font-semibold">%</span>} />
         </div>
 
-        <Card title="Resumen de flota" subtitle="Información operativa tomada desde los datos mock de vehículos">
-          <div className="grid gap-3 sm:grid-cols-3">
-            {fleetSummary.map((item) => (
-              <div key={item.label} className="rounded-xl border border-slate-800 bg-slate-950/70 p-3">
-                <p className="text-sm text-slate-400">{item.label}</p>
-                <p className="mt-2 text-2xl font-semibold text-white">{item.value}</p>
-              </div>
-            ))}
+        <Card title="Resumen operativo" subtitle="Indicadores calculados desde las operaciones registradas">
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="rounded-xl border border-slate-800 bg-slate-950/70 p-3"><p className="text-sm text-slate-400">Operaciones</p><p className="mt-2 text-2xl font-semibold text-white">{operations.length}</p></div>
+            <div className="rounded-xl border border-slate-800 bg-slate-950/70 p-3"><p className="text-sm text-slate-400">Vehículos disponibles</p><p className="mt-2 text-2xl font-semibold text-white">{availableVehicles}</p></div>
+            <div className="rounded-xl border border-slate-800 bg-slate-950/70 p-3"><p className="text-sm text-slate-400">Operaciones en ruta</p><p className="mt-2 text-2xl font-semibold text-white">{operationsInRoute}</p></div>
+            <div className="rounded-xl border border-slate-800 bg-slate-950/70 p-3"><p className="text-sm text-slate-400">Pendientes de cierre</p><p className="mt-2 text-2xl font-semibold text-white">{pendingClosure}</p></div>
           </div>
         </Card>
 
-        <div className="grid gap-6 xl:grid-cols-[1.45fr_0.95fr]">
-          <Card title="Gráfico de ingresos" subtitle="Evolución mensual del rendimiento operativo">
-            <div className="flex h-64 items-end justify-between gap-3 rounded-2xl border border-slate-800/70 bg-gradient-to-br from-slate-900 via-slate-900 to-slate-800 p-4">
-              {[38, 54, 46, 70, 62, 78, 86].map((height, index) => (
-                <div key={`${height}-${index}`} className="flex flex-1 flex-col items-center gap-2">
-                  <div
-                    className="w-full rounded-t-xl bg-gradient-to-t from-[#2563EB] to-[#60A5FA]"
-                    style={{ height: `${height}%` }}
-                  />
-                  <span className="text-xs text-slate-400">{["E", "F", "M", "A", "M", "J", "J"][index]}</span>
-                </div>
-              ))}
-            </div>
+        <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
+          <Card title="Últimas operaciones" subtitle="Seguimiento de la operación reciente">
+            {latestOperations.length === 0 ? (
+              <div className="rounded-2xl border border-dashed border-slate-700 bg-slate-950/60 p-8 text-center">
+                <h3 className="text-lg font-semibold text-white">No hay operaciones aún</h3>
+                <p className="mt-2 text-sm text-slate-400">Crea una nueva operación para ver el historial aquí.</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="min-w-full text-left text-sm text-slate-300">
+                  <thead>
+                    <tr className="border-b border-slate-800 text-slate-400">
+                      <th className="px-3 py-3 font-medium">ID</th>
+                      <th className="px-3 py-3 font-medium">Cliente</th>
+                      <th className="px-3 py-3 font-medium">Ruta</th>
+                      <th className="px-3 py-3 font-medium">Estado</th>
+                      <th className="px-3 py-3 font-medium">Utilidad</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {latestOperations.map((operation) => (
+                      <tr key={operation.id} className="border-b border-slate-800/70 text-slate-200 last:border-0">
+                        <td className="px-3 py-3 font-medium text-white">{operation.id}</td>
+                        <td className="px-3 py-3">{operation.client}</td>
+                        <td className="px-3 py-3">{operation.origin} → {operation.destination}</td>
+                        <td className="px-3 py-3"><span className={`rounded-full px-2.5 py-1 text-xs font-medium ${getStatusTone(operation.status)}`}>{operation.status}</span></td>
+                        <td className="px-3 py-3">{formatCurrency(operation.utility)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </Card>
 
           <Card title="Gastos por categoría" subtitle="Distribución de costos del periodo">
-            <div className="space-y-4">
-              {[
-                { label: "Combustible", value: "42%", color: "bg-[#2563EB]" },
-                { label: "Mantenimiento", value: "24%", color: "bg-[#16A34A]" },
-                { label: "Personal", value: "19%", color: "bg-[#DC2626]" },
-                { label: "Operación", value: "15%", color: "bg-slate-500" },
-              ].map((item) => (
-                <div key={item.label}>
-                  <div className="mb-2 flex items-center justify-between text-sm">
-                    <span className="text-slate-300">{item.label}</span>
-                    <span className="font-medium text-white">{item.value}</span>
+            {categoryExpenses.every((item) => item.value === 0) ? (
+              <div className="rounded-2xl border border-dashed border-slate-700 bg-slate-950/60 p-6 text-center text-sm text-slate-400">Aún no hay gastos registrados.</div>
+            ) : (
+              <div className="space-y-4">
+                {categoryExpenses.map((item) => (
+                  <div key={item.label}>
+                    <div className="mb-2 flex items-center justify-between text-sm">
+                      <span className="text-slate-300">{item.label}</span>
+                      <span className="font-medium text-white">{formatCurrency(item.value)}</span>
+                    </div>
+                    <div className="h-2.5 rounded-full bg-slate-800">
+                      <div className={`h-2.5 rounded-full ${item.color}`} style={{ width: `${(item.value / maxValue) * 100}%` }} />
+                    </div>
                   </div>
-                  <div className="h-2.5 rounded-full bg-slate-800">
-                    <div className={`h-2.5 rounded-full ${item.color}`} style={{ width: item.value }} />
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </Card>
         </div>
-
-        <Card title="Últimos viajes" subtitle="Seguimiento de la operación reciente">
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-left text-sm text-slate-300">
-              <thead>
-                <tr className="border-b border-slate-800 text-slate-400">
-                  <th className="px-3 py-3 font-medium">ID</th>
-                  <th className="px-3 py-3 font-medium">Ruta</th>
-                  <th className="px-3 py-3 font-medium">Conductor</th>
-                  <th className="px-3 py-3 font-medium">Vehículo</th>
-                  <th className="px-3 py-3 font-medium">Estado</th>
-                  <th className="px-3 py-3 font-medium">Ingresos</th>
-                </tr>
-              </thead>
-              <tbody>
-                {recentTrips.map((trip) => (
-                  <tr key={trip.id} className="border-b border-slate-800/70 text-slate-200 last:border-0">
-                    <td className="px-3 py-3 font-medium text-white">{trip.id}</td>
-                    <td className="px-3 py-3">{trip.route}</td>
-                    <td className="px-3 py-3">{trip.driver}</td>
-                    <td className="px-3 py-3">{trip.vehicle}</td>
-                    <td className="px-3 py-3">
-                      <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${
-                        trip.status === "Completado"
-                          ? "bg-emerald-500/15 text-emerald-400"
-                          : trip.status === "En curso"
-                            ? "bg-sky-500/15 text-sky-400"
-                            : "bg-amber-500/15 text-amber-400"
-                      }`}>
-                        {trip.status}
-                      </span>
-                    </td>
-                    <td className="px-3 py-3">{trip.revenue}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </Card>
       </div>
     </AppShell>
   );

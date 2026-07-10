@@ -12,10 +12,10 @@ type NavItem = {
 
 const navItems: NavItem[] = [
   { label: "Dashboard", href: "/", icon: HomeIcon },
-  { label: "Viajes", href: "/viajes", icon: RouteIcon },
+  { label: "Operaciones", href: "/operaciones", icon: RouteIcon },
   { label: "Vehículos", href: "/vehiculos", icon: TruckIcon },
   { label: "Conductores", href: "/conductores", icon: UserGroupIcon },
-  { label: "Reportes", href: "/reportes", icon: ChartIcon },
+  { label: "Clientes", href: "/clientes", icon: UserGroupIcon },
   { label: "Importar datos", href: "/importar-datos", icon: UploadIcon },
   { label: "Configuración", href: "/configuracion", icon: SettingsIcon },
 ];

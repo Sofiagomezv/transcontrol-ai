@@ -1,4 +1,4 @@
-export type VehicleStatus = "Disponible" | "En viaje" | "Mantenimiento" | "Inactivo";
+export type VehicleStatus = "Disponible" | "En operación" | "Mantenimiento" | "Inactivo";
 
 export type VehicleType = "Camión" | "Bus" | "Vehículo ligero" | "Volquete";
 
@@ -10,6 +10,7 @@ export type Vehicle = {
   year: number;
   type: VehicleType;
   capacity: string;
+  currentMileage: number;
   status: VehicleStatus;
 };
 
