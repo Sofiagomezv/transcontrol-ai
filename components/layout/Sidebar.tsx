@@ -16,6 +16,7 @@ const navItems: NavItem[] = [
   { label: "Vehículos", href: "/vehiculos", icon: TruckIcon },
   { label: "Conductores", href: "/conductores", icon: UserGroupIcon },
   { label: "Reportes", href: "/reportes", icon: ChartIcon },
+  { label: "Importar datos", href: "/importar-datos", icon: UploadIcon },
   { label: "Configuración", href: "/configuracion", icon: SettingsIcon },
 ];
 
@@ -144,6 +145,16 @@ function SettingsIcon(props: SVGProps<SVGSVGElement>) {
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" {...props}>
       <circle cx="12" cy="12" r="3" />
       <path d="M19 12a7 7 0 0 0-.1-1.1l2-1.6-2-3.5-2.4 1a7.1 7.1 0 0 0-1.9-1.1L14 2h-4l-.6 2.8a7.1 7.1 0 0 0-1.9 1.1l-2.4-1-2 3.5 2 1.6A7 7 0 0 0 5 12a7 7 0 0 0 .1 1.1l-2 1.6 2 3.5 2.4-1a7.1 7.1 0 0 0 1.9 1.1L10 22h4l.6-2.8a7.1 7.1 0 0 0 1.9-1.1l2.4 1 2-3.5-2-1.6c.1-.3.1-.7.1-1.1Z" />
+    </svg>
+  );
+}
+
+function UploadIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" {...props}>
+      <path d="M12 16V4" />
+      <path d="m7 9 5-5 5 5" />
+      <path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" />
     </svg>
   );
 }
